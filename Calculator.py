@@ -1,30 +1,33 @@
 '''
 Created on 6 mei 2014
 
+Erlang functions for use in calculators
+
 @author: Patrick.Hubers
 '''
 from math import pow, factorial, exp, ceil, trunc
 
-def PowerFactorial(valueA, valueB):
-    fct = factorial(valueA)
-    #print "Factorial %d is %d" % (valueA, fct)
-    pw = pow(valueB, valueA)
-    #print "%d to the power %d is %d" % (valueB, valueA, pw)
-    answer = pw / fct
-    return( answer )
+def Poisson(actual, mean):
+    # naive:   math.exp(-mean) * mean**actual / factorial(actual)
+    # iterative, to keep the components from getting too large or small:
+    p = exp(-mean)
+    for i in xrange(actual):
+        p *= mean
+        p /= i+1
+    return p
 
 def Workload(volume, avgHandleTime, intervalLength=60):
     return( (volume*avgHandleTime)/(60.0*intervalLength) )
 
 def Occupancy(numAgents, workload):
-    return( workload/numAgents )
+    return( workload/(numAgents*1.0) )
 
 def ErlangC(numAgents, workload):
-    term = PowerFactorial(numAgents, workload)
-    totalsum = 0
-    for k in range (0,numAgents):
-        totalsum += PowerFactorial(k, workload)
-    erlangc = term / (term+(1-Occupancy(numAgents,workload))*totalsum)
+    pois_discrete = Poisson(numAgents, workload)
+    pois_cum = 0.0
+    for k in range (0, numAgents):
+        pois_cum += Poisson(k, workload)
+    erlangc = pois_discrete / (pois_discrete + (( 1.0 - Occupancy(numAgents,workload)) * pois_cum))
     return( erlangc )
 
 def AverageWaitingTime(numAgents, volume, avgHandleTime, intervalLength):
@@ -33,26 +36,24 @@ def AverageWaitingTime(numAgents, volume, avgHandleTime, intervalLength):
 
 def ServiceLevel(numAgents, volume, avgHandleTime, intervalLength, maxWaitingTime):
     workload = Workload(volume, avgHandleTime, intervalLength)
-    return( 1-ErlangC(numAgents,workload)* exp(-(numAgents-workload)*(maxWaitingTime/avgHandleTime)) )
+    return( 1-ErlangC(numAgents,workload)* exp(-(numAgents-workload)*((maxWaitingTime*1.0)/avgHandleTime)) )
 
 def AgentsForServiceLevel(volume, avgHandleTime, intervalLength, maxWaitingTime, serviceGoal):
     workload = Workload(volume, avgHandleTime, intervalLength)
     agents = trunc(ceil(workload))
-    print "Starting with %d agents" % agents
     while( ServiceLevel(agents, volume, avgHandleTime, intervalLength, maxWaitingTime) < serviceGoal ):
-        agents += 1
+    	agents += 1
     return( agents )
-    
+
 if __name__ == '__main__':
-    calls = 620
-    aht = 415
-    wload = Workload(calls, aht)
-    svgoal = 0.8
-    waittime = 20
-    print "Workload for %d calls with %d seconds of AHT is %f" % (calls, aht, wload)
-    agents = AgentsForServiceLevel(calls, aht, 60, waittime, svgoal)
-    print "%d Agents are needed to achieve a %d/%d service level" % (agents, svgoal*100, waittime)
-    sl = ServiceLevel(agents, calls, aht, 60, waittime)
-    print "In that case, you'll get a service level of %f%%" % (sl*100)
-    print "Your occupancy will be %f%%" % (wload/agents*100)
-    
+    vol = 400
+    aht = 180
+    wl = Workload(vol, aht, 60)
+    print 'Workload for %d calls/hour with an AHT of %d seconds is %d' % (vol, aht, wl)
+    sgoal = 0.8
+    stime = 20
+    agents = AgentsForServiceLevel(vol, aht, 60, stime, sgoal)
+    print 'Required agents for a service level of %d/%d is %d' % (sgoal*100, stime, agents)
+    print 'Waiting chance for a caller is %f ' % ErlangC(agents, wl)
+    print 'Service level is %f ' % ServiceLevel(agents, vol, aht, 60, stime)
+    print 'Occupancy is %f' % Occupancy(agents, wl)
