@@ -25,8 +25,13 @@ def button_tapped(sender):
 	textfieldSLPercentage.end_editing()
 	waittime = int(textfieldSLWaittime.text)
 	textfieldSLWaittime.end_editing()
+	workload = Workload(calls, aht, 60)
+	textfieldWorkload.text = '%s' % workload
 	agents = AgentsForServiceLevel(calls, aht, 60, waittime, svgoal)
 	textfieldAgents.text = '%s' % agents
+	occupancy = workload / agents
+	textfieldOccupancy.text = '%s' % (occupancy * 100)
+	
 	 
 if __name__ == '__main__':
 	v = ui.load_view('ErlangCalculator')
@@ -38,11 +43,15 @@ if __name__ == '__main__':
 	textfieldSLPercentage.keyboard_type = ui.KEYBOARD_NUMBER_PAD
 	textfieldSLWaittime = v['textfieldSLWaittime']
 	textfieldSLWaittime.keyboard_type = ui.KEYBOARD_NUMBER_PAD
+	textfieldWorkload = v['textfieldWorkload']
+	textfieldWorkload.enabled = False 
 	textfieldAgents = v['textfieldAgents']
 	textfieldAgents.enabled = False
+	textfieldOccupancy = v['textfieldOccupancy']
+	textfieldOccupancy.enabled = False
 	if ui.get_screen_size()[1] >= 768:
 		# iPad
 		v.present('popover')
 	else:
 		# iPhone
-		v.present(orientations=['portrait'])    
+		v.present(orientations=['portrait'])    

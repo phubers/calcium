@@ -56,4 +56,4 @@ if __name__ == '__main__':
     print 'Required agents for a service level of %d/%d is %d' % (sgoal*100, stime, agents)
     print 'Waiting chance for a caller is %f ' % ErlangC(agents, wl)
     print 'Service level is %f ' % ServiceLevel(agents, vol, aht, 60, stime)
-    print 'Occupancy is %f' % Occupancy(agents, wl)
+    print 'Occupancy is %f' % Occupancy(agents, wl)
