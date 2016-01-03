@@ -7,6 +7,8 @@ Requires erlang.py (for core functions) and ErlangCalculator.pyui (for UI defini
 @author: Patrick.Hubers
 '''
 from erlang import *
+from io import BytesIO
+import matplotlib.pyplot as plt
 import ui
  
 # def create_view:
@@ -26,12 +28,25 @@ def button_tapped(sender):
 	waittime = int(textfieldSLWaittime.text)
 	textfieldSLWaittime.end_editing()
 	workload = Workload(calls, aht, 60)
-	textfieldWorkload.text = '%s' % workload
+	textfieldWorkload.text = '%4.2f' % workload
 	agents = AgentsForServiceLevel(calls, aht, 60, waittime, svgoal)
 	textfieldAgents.text = '%s' % agents
 	occupancy = workload / agents
-	textfieldOccupancy.text = '%s' % (occupancy * 100)
+	textfieldOccupancy.text = '%4.2f' % (occupancy * 100)
 	
+	agent_range = range(trunc(ceil(workload)), agents+3)
+	plt.clf()
+	plt.plot(agent_range, [ServiceLevel(agent, calls, aht, 60, waittime)*100 for agent in agent_range])
+	plt.grid(True)
+	plt.axis(ymin=0, ymax=100)
+	plt.xlabel('Agents')
+	plt.ylabel('Service level %')
+	plt.xticks(agent_range)
+	
+	b = BytesIO()
+	plt.savefig(b)
+	img = ui.Image.from_data(b.getvalue())
+	imageviewPlot.image = img
 	 
 if __name__ == '__main__':
 	v = ui.load_view('ErlangCalculator')
@@ -49,6 +64,8 @@ if __name__ == '__main__':
 	textfieldAgents.enabled = False
 	textfieldOccupancy = v['textfieldOccupancy']
 	textfieldOccupancy.enabled = False
+	imageviewPlot = v['plotView']
+	imageviewPlot.content_mode = ui.CONTENT_SCALE_ASPECT_FIT
 	if ui.get_screen_size()[1] >= 768:
 		# iPad
 		v.present('popover')
