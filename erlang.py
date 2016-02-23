@@ -42,7 +42,7 @@ def AgentsForServiceLevel(volume, avgHandleTime, intervalLength, maxWaitingTime,
     workload = Workload(volume, avgHandleTime, intervalLength)
     agents = trunc(ceil(workload))
     while( ServiceLevel(agents, volume, avgHandleTime, intervalLength, maxWaitingTime) < serviceGoal ):
-    	agents += 1
+        agents += 1
     return( agents )
 
 if __name__ == '__main__':
