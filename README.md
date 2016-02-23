@@ -7,5 +7,7 @@ Calcium contains a small library of staffing functions that can be used in Pytho
 It currently contains a calculator for iOS and for windowed GUI systems that can use tkinter and ttk.
 
 ToDo:
+
+* make calculator robust: currently no input checking is performed. On iOS this risk is mitigated by only allowing the numerical keyboard, but the Windows version does not have any safety.
 * calculator required staff for ASA service goal
 
