@@ -1,3 +1,5 @@
+#!python2
+
 '''
 Created on 6 mei 2014
 
@@ -34,7 +36,7 @@ def button_tapped(sender):
 	occupancy = workload / agents
 	textfieldOccupancy.text = '%4.2f' % (occupancy * 100)
 	
-	agent_range = range(trunc(ceil(workload)), agents+3)
+	agent_range = list(range(trunc(ceil(workload)), agents+3))
 	plt.clf()
 	plt.plot(agent_range, [ServiceLevel(agent, calls, aht, 60, waittime)*100 for agent in agent_range])
 	plt.grid(True)
@@ -71,4 +73,4 @@ if __name__ == '__main__':
 		v.present('popover')
 	else:
 		# iPhone
-		v.present(orientations=['portrait'])    
+		v.present(orientations=['portrait'])    
